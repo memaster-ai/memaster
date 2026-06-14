@@ -6,6 +6,7 @@ This repository contains only client SDK packages:
 
 - `python/`: Python package `memaster`
 - `typescript/`: TypeScript package `memaster`
+- `skills/`: ready-to-use AI editor Skills backed by Memaster Cloud
 
 Both clients default to `https://api.memaster.cn` and authenticate with the `X-API-Key` header.
 
@@ -53,4 +54,19 @@ const results = await client.search({
   user_id: "user_123",
   top_k: 5,
 });
+```
+
+## AI Editor Skills
+
+Use `skills/memaster-memory` when you want an AI editor or coding assistant to search and write long-term memory as part of its workflow, without requiring MCP.
+
+```bash
+cp -R skills/memaster-memory ~/.claude/skills/memaster-memory
+cp ~/.claude/skills/memaster-memory/.env.example ~/.claude/skills/memaster-memory/.env.local
+```
+
+Set `MEMASTER_API_KEY` in `.env.local`, then verify:
+
+```bash
+python3 ~/.claude/skills/memaster-memory/scripts/memaster_memory.py doctor
 ```
