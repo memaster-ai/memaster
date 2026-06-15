@@ -28,6 +28,8 @@ MEMASTER_AGENT_ID=<your-agent-id>
 MEMASTER_SOURCE=<your-editor-or-agent>
 MEMASTER_PROJECT=<project-name>
 MEMASTER_AREA=<project-area>
+MEMASTER_INFER=false
+MEMASTER_TIMEOUT_SECONDS=20
 ```
 
 At least one of `MEMASTER_USER_ID`, `MEMASTER_AGENT_ID`, or `--run-id` must be available for memory scope.
@@ -42,6 +44,7 @@ Use the bundled helper:
 python3 scripts/memaster_memory.py doctor
 python3 scripts/memaster_memory.py search --query "What are the project conventions?" --top-k 5
 python3 scripts/memaster_memory.py add --title "Package manager" --content "This project uses pnpm." --memory-type project_info --tags "项目,规范,包管理"
+python3 scripts/memaster_memory.py add --infer --title "Extract memories" --content "User prefers concise Chinese replies and pnpm." --memory-type user_preference --tags "偏好,写入"
 python3 scripts/memaster_memory.py list --project "my-project"
 ```
 
@@ -87,6 +90,8 @@ Recommended metadata:
 - `service`: default `Memaster`
 - `source`: editor or agent, such as `cursor`, `claude-code`, or `windsurf`
 - `tags`: short labels for filtering
+- `infer`: set `MEMASTER_INFER=true` or pass `--infer` to ask the server to extract durable memories from the input. Use `--no-infer` to disable it for one call.
+- `timeout`: set `MEMASTER_TIMEOUT_SECONDS` higher when `infer=true` because LLM extraction can take longer than regular requests.
 
 ## Safety policy
 

@@ -18,6 +18,7 @@ client = MemoryClient(api_key="m0sk_xxx")
 client.add(
     user_id="user_123",
     messages=[{"role": "user", "content": "我喜欢中文回复"}],
+    infer=True,
 )
 
 results = client.search(

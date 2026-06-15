@@ -13,6 +13,8 @@ Environment:
   MEMASTER_PROJECT   optional default metadata/filter project
   MEMASTER_AREA      optional default metadata/filter area
   MEMASTER_SCOPE     optional default metadata/filter scope
+  MEMASTER_INFER     optional true/false; add sends infer=true when enabled
+  MEMASTER_TIMEOUT_SECONDS optional request timeout, default 20
 """
 
 from __future__ import annotations
@@ -57,6 +59,24 @@ def env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
 
 
+def env_bool(name: str, default: bool = False) -> bool:
+    value = env(name)
+    if not value:
+        return default
+    return value.lower() in {"1", "true", "yes", "y", "on"}
+
+
+def env_int(name: str, default: int) -> int:
+    value = env(name)
+    if not value:
+        return default
+    try:
+        parsed = int(value)
+    except ValueError:
+        return default
+    return parsed if parsed > 0 else default
+
+
 def base_url() -> str:
     return env("MEMASTER_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
 
@@ -77,7 +97,7 @@ def request_json(method: str, path: str, body: dict[str, Any] | None = None) -> 
     if body is not None:
         req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        with urllib.request.urlopen(req, timeout=env_int("MEMASTER_TIMEOUT_SECONDS", 20)) as resp:
             raw = resp.read().decode("utf-8")
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as exc:
@@ -171,6 +191,8 @@ def cmd_doctor(args: argparse.Namespace) -> None:
         "agent_id": bool(args.agent_id),
         "project": args.project,
         "area": args.area,
+        "infer": env_bool("MEMASTER_INFER"),
+        "timeout_seconds": env_int("MEMASTER_TIMEOUT_SECONDS", 20),
     }
     print_json(status)
 
@@ -202,6 +224,8 @@ def cmd_add(args: argparse.Namespace) -> None:
         "messages": [{"role": "user", "content": args.content}],
         "metadata": metadata,
     }
+    if args.infer:
+        body["infer"] = True
     body.update(build_scope_body(args))
     print_json(request_json("POST", "/memories", body))
 
@@ -283,6 +307,8 @@ def build_parser() -> argparse.ArgumentParser:
     add.add_argument("--memory-type", default="project_info")
     add.add_argument("--metadata", default="", help="Extra metadata JSON")
     add.add_argument("--tags", default="", help="Comma-separated tags")
+    add.add_argument("--infer", action="store_true", default=env_bool("MEMASTER_INFER"), help="Enable server-side infer=true memory extraction")
+    add.add_argument("--no-infer", dest="infer", action="store_false", help="Disable infer even when MEMASTER_INFER=true")
     add.set_defaults(func=cmd_add)
 
     list_cmd = subparsers.add_parser("list", help="List Memaster memory")

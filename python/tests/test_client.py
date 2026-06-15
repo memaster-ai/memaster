@@ -35,6 +35,7 @@ class MemoryClientTest(unittest.TestCase):
                 user_id="user_123",
                 messages=[{"role": "user", "content": "hello"}],
                 metadata={"project": "demo"},
+                infer=True,
             )
 
         request, timeout = calls[0]
@@ -48,6 +49,7 @@ class MemoryClientTest(unittest.TestCase):
                 "user_id": "user_123",
                 "messages": [{"role": "user", "content": "hello"}],
                 "metadata": {"project": "demo"},
+                "infer": True,
             },
         )
 

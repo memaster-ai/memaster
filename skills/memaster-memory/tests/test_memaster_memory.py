@@ -68,6 +68,32 @@ class MemasterMemoryScriptTest(unittest.TestCase):
         self.assertEqual(payload["metadata"]["area"], "docs")
         self.assertEqual(payload["metadata"]["tags"], ["项目", "规范"])
 
+    def test_add_uses_infer_and_timeout_env(self):
+        calls = []
+
+        def fake_urlopen(request, timeout):
+            calls.append((request, timeout))
+            return FakeResponse({"results": []})
+
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test", "MEMASTER_INFER": "true", "MEMASTER_TIMEOUT_SECONDS": "120"}, clear=True):
+            parser = memaster_memory.build_parser()
+            args = parser.parse_args([
+                "add",
+                "--user-id", "alice",
+                "--agent-id", "skills",
+                "--project", "Memaster",
+                "--area", "docs",
+                "--title", "Infer test",
+                "--content", "Use infer.",
+            ])
+            with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
+                args.func(args)
+
+        request, timeout = calls[0]
+        self.assertEqual(timeout, 120)
+        payload = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(payload["infer"], True)
+
     def test_delete_requires_yes(self):
         parser = memaster_memory.build_parser()
         args = parser.parse_args(["delete", "--memory-id", "abc"])

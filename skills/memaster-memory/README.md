@@ -30,6 +30,8 @@ MEMASTER_USER_ID=your-user-id
 MEMASTER_AGENT_ID=your-agent-id
 MEMASTER_PROJECT=your-project
 MEMASTER_AREA=your-area
+MEMASTER_INFER=false
+MEMASTER_TIMEOUT_SECONDS=20
 ```
 
 ## Verify
@@ -44,6 +46,7 @@ python3 scripts/memaster_memory.py search --query "test" --top-k 1
 ```bash
 python3 scripts/memaster_memory.py search --query "What are the project conventions?"
 python3 scripts/memaster_memory.py add --title "Project convention" --content "This project uses pnpm." --memory-type project_info --tags "项目,规范"
+python3 scripts/memaster_memory.py add --infer --title "Extract memories" --content "User prefers concise Chinese replies and pnpm." --memory-type user_preference --tags "偏好,写入"
 python3 scripts/memaster_memory.py list --project "my-project"
 python3 scripts/memaster_memory.py update --memory-id "memory-id" --content "Updated memory" --project "my-project" --area "docs"
 python3 scripts/memaster_memory.py delete --memory-id "memory-id" --yes

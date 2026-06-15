@@ -26,6 +26,7 @@ POST /memories
   ],
   "user_id": "<MEMASTER_USER_ID>",
   "agent_id": "<MEMASTER_AGENT_ID>",
+  "infer": true,
   "metadata": {
     "title": "Title",
     "memory_type": "project_info",
@@ -38,6 +39,8 @@ POST /memories
 ```
 
 At least one of `user_id`, `agent_id`, or `run_id` is required.
+
+Set `infer` to `true` when you want the server to extract durable memories from the input instead of storing the whole text verbatim.
 
 ## Search memory
 

@@ -18,6 +18,7 @@ const client = new MemoryClient({ apiKey: "m0sk_xxx" });
 await client.add({
   user_id: "user_123",
   messages: [{ role: "user", content: "我喜欢中文回复" }],
+  infer: true,
 });
 
 const results = await client.search({

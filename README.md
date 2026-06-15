@@ -24,6 +24,7 @@ client = MemoryClient()
 client.add(
     user_id="user_123",
     messages=[{"role": "user", "content": "我喜欢中文回复"}],
+    infer=True,
 )
 
 results = client.search(
@@ -47,6 +48,7 @@ const client = new MemoryClient({ apiKey: process.env.MEMASTER_API_KEY! });
 await client.add({
   user_id: "user_123",
   messages: [{ role: "user", content: "我喜欢中文回复" }],
+  infer: true,
 });
 
 const results = await client.search({
@@ -65,7 +67,7 @@ cp -R skills/memaster-memory ~/.claude/skills/memaster-memory
 cp ~/.claude/skills/memaster-memory/.env.example ~/.claude/skills/memaster-memory/.env.local
 ```
 
-Set `MEMASTER_API_KEY` in `.env.local`, then verify:
+Set `MEMASTER_API_KEY` in `.env.local`. Set `MEMASTER_INFER=true` if you want `add` to request server-side memory extraction by default, then verify:
 
 ```bash
 python3 ~/.claude/skills/memaster-memory/scripts/memaster_memory.py doctor

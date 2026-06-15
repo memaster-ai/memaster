@@ -17,6 +17,7 @@ test("add sends X-API-Key and expected payload", async () => {
     user_id: "user_123",
     messages: [{ role: "user", content: "hello" }],
     metadata: { project: "demo" },
+    infer: true,
   });
 
   assert.equal(calls[0].url, "https://example.test/memories");
@@ -26,6 +27,7 @@ test("add sends X-API-Key and expected payload", async () => {
     user_id: "user_123",
     messages: [{ role: "user", content: "hello" }],
     metadata: { project: "demo" },
+    infer: true,
   });
 });
 
