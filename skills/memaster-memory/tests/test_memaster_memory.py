@@ -52,7 +52,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
             "--tags", "项目,规范",
         ])
 
-        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "msk_test"}, clear=True):
             with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
                 args.func(args)
 
@@ -60,7 +60,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
         self.assertEqual(timeout, 20)
         self.assertEqual(request.full_url, "https://api.memaster.cn/memories")
         self.assertEqual(request.get_method(), "POST")
-        self.assertEqual(request.headers["X-api-key"], "m0sk_test")
+        self.assertEqual(request.headers["X-api-key"], "msk_test")
         payload = json.loads(request.data.decode("utf-8"))
         self.assertEqual(payload["user_id"], "alice")
         self.assertEqual(payload["agent_id"], "skills")
@@ -75,7 +75,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
             calls.append((request, timeout))
             return FakeResponse({"results": []})
 
-        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test", "MEMASTER_INFER": "true", "MEMASTER_TIMEOUT_SECONDS": "120"}, clear=True):
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "msk_test", "MEMASTER_INFER": "true", "MEMASTER_TIMEOUT_SECONDS": "120"}, clear=True):
             parser = memaster_memory.build_parser()
             args = parser.parse_args([
                 "add",
@@ -113,7 +113,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
             "--filters", '{"scope":"docs"}',
         ])
 
-        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "msk_test"}, clear=True):
             with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
                 args.func(args)
 
@@ -136,7 +136,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
 
         parser = memaster_memory.build_parser()
         args = parser.parse_args(["get", "--memory-id", "abc"])
-        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "msk_test"}, clear=True):
             with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
                 args.func(args)
 
@@ -159,7 +159,7 @@ class MemasterMemoryScriptTest(unittest.TestCase):
 
         parser = memaster_memory.build_parser()
         args = parser.parse_args(["delete", "--memory-id", "abc", "--yes"])
-        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "msk_test"}, clear=True):
             with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
                 args.func(args)
 

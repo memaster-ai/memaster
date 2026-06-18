@@ -1,0 +1,12 @@
+node_modules/
+src/
+test/
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+openclaw-types.d.ts
+.gitignore
+.npmignore
+*.tgz
+.env
+.env.local

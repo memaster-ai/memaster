@@ -1,0 +1,109 @@
+{
+  "id": "openclaw-memaster",
+  "kind": "memory",
+  "uiHints": {
+    "apiKey": {
+      "label": "Memaster API Key",
+      "sensitive": true,
+      "placeholder": "msk_...",
+      "help": "API key from Memaster Dashboard (or use ${MEMASTER_API_KEY})."
+    },
+    "baseUrl": {
+      "label": "Base URL",
+      "placeholder": "https://api.memaster.cn",
+      "help": "Memaster API endpoint. Override only for self-hosted deployments."
+    },
+    "userId": {
+      "label": "Default User ID",
+      "placeholder": "alice",
+      "help": "Stable identifier for the end user. Memories are scoped to this value."
+    },
+    "agentId": {
+      "label": "Agent ID",
+      "placeholder": "openclaw",
+      "help": "Optional agent identifier, useful when multiple agents share the same user."
+    },
+    "project": {
+      "label": "Project",
+      "placeholder": "my-project",
+      "help": "Optional project name attached to every memory as metadata.project."
+    },
+    "area": {
+      "label": "Area",
+      "placeholder": "agent",
+      "help": "Optional area attached as metadata.area."
+    },
+    "scope": {
+      "label": "Scope",
+      "placeholder": "openclaw-session",
+      "help": "Optional topical scope attached as metadata.scope."
+    },
+    "source": {
+      "label": "Source",
+      "placeholder": "openclaw",
+      "help": "Optional source label attached as metadata.source. Defaults to openclaw."
+    },
+    "autoCapture": {
+      "label": "Auto-Capture",
+      "help": "Automatically extract and store memories after each agent turn."
+    },
+    "autoRecall": {
+      "label": "Auto-Recall",
+      "help": "Automatically inject relevant memories before each agent turn."
+    },
+    "topK": {
+      "label": "Top K",
+      "placeholder": "5",
+      "help": "Maximum number of memories returned by recall and search."
+    },
+    "infer": {
+      "label": "Server-side Extraction",
+      "help": "When enabled, auto-capture asks Memaster to extract durable facts from the conversation. Otherwise raw turns are stored verbatim. Requires a Growth plan."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "apiKey": {
+        "type": "string"
+      },
+      "baseUrl": {
+        "type": "string"
+      },
+      "userId": {
+        "type": "string"
+      },
+      "agentId": {
+        "type": "string"
+      },
+      "project": {
+        "type": "string"
+      },
+      "area": {
+        "type": "string"
+      },
+      "scope": {
+        "type": "string"
+      },
+      "source": {
+        "type": "string"
+      },
+      "autoCapture": {
+        "type": "boolean"
+      },
+      "autoRecall": {
+        "type": "boolean"
+      },
+      "topK": {
+        "type": "number"
+      },
+      "infer": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "apiKey"
+    ]
+  }
+}

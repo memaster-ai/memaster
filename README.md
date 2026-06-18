@@ -14,7 +14,7 @@ Both clients default to `https://api.memaster.cn` and authenticate with the `X-A
 
 ```bash
 pip install memaster
-export MEMASTER_API_KEY="m0sk_xxx"
+export MEMASTER_API_KEY="msk_xxx"
 ```
 
 ```python

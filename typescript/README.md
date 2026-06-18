@@ -13,7 +13,7 @@ pnpm add memaster
 ```typescript
 import { MemoryClient } from "memaster";
 
-const client = new MemoryClient({ apiKey: "m0sk_xxx" });
+const client = new MemoryClient({ apiKey: "msk_xxx" });
 
 await client.add({
   user_id: "user_123",

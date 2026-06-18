@@ -13,7 +13,7 @@ pip install memaster
 ```python
 from memaster import MemoryClient
 
-client = MemoryClient(api_key="m0sk_xxx")
+client = MemoryClient(api_key="msk_xxx")
 
 client.add(
     user_id="user_123",

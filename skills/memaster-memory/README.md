@@ -25,7 +25,7 @@ cp ~/.claude/skills/memaster-memory/.env.example ~/.claude/skills/memaster-memor
 Edit `.env.local` and set:
 
 ```text
-MEMASTER_API_KEY=m0sk_xxx
+MEMASTER_API_KEY=msk_xxx
 MEMASTER_USER_ID=your-user-id
 MEMASTER_AGENT_ID=your-agent-id
 MEMASTER_PROJECT=your-project

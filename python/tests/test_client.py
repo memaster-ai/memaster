@@ -30,7 +30,7 @@ class MemoryClientTest(unittest.TestCase):
             return FakeResponse({"results": []})
 
         with patch("memaster.client.urlopen", fake_urlopen):
-            client = MemoryClient(api_key="m0sk_test", base_url="https://example.test/", timeout=3)
+            client = MemoryClient(api_key="msk_test", base_url="https://example.test/", timeout=3)
             client.add(
                 user_id="user_123",
                 messages=[{"role": "user", "content": "hello"}],
@@ -42,7 +42,7 @@ class MemoryClientTest(unittest.TestCase):
         self.assertEqual(timeout, 3)
         self.assertEqual(request.full_url, "https://example.test/memories")
         self.assertEqual(request.get_method(), "POST")
-        self.assertEqual(request.headers["X-api-key"], "m0sk_test")
+        self.assertEqual(request.headers["X-api-key"], "msk_test")
         self.assertEqual(
             json.loads(request.data.decode("utf-8")),
             {
@@ -61,7 +61,7 @@ class MemoryClientTest(unittest.TestCase):
             return FakeResponse({"results": [{"id": "1", "memory": "hello"}]})
 
         with patch("memaster.client.urlopen", fake_urlopen):
-            client = MemoryClient(api_key="m0sk_test", base_url="https://example.test")
+            client = MemoryClient(api_key="msk_test", base_url="https://example.test")
             result = client.search(query="hello", user_id="user_123", top_k=5)
 
         self.assertEqual(calls[0].full_url, "https://example.test/search")
@@ -74,7 +74,7 @@ class MemoryClientTest(unittest.TestCase):
             raise HTTPError(request.full_url, 400, "Bad Request", {}, body)
 
         with patch("memaster.client.urlopen", fake_urlopen):
-            client = MemoryClient(api_key="m0sk_test")
+            client = MemoryClient(api_key="msk_test")
             with self.assertRaises(APIError):
                 client.get("missing")
 
