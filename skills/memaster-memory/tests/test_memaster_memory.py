@@ -94,11 +94,78 @@ class MemasterMemoryScriptTest(unittest.TestCase):
         payload = json.loads(request.data.decode("utf-8"))
         self.assertEqual(payload["infer"], True)
 
+    def test_search_builds_filters_payload(self):
+        calls = []
+
+        def fake_urlopen(request, timeout):
+            calls.append((request, timeout))
+            return FakeResponse({"results": []})
+
+        parser = memaster_memory.build_parser()
+        args = parser.parse_args([
+            "search",
+            "--query", "project rules",
+            "--project", "Memaster",
+            "--area", "docs",
+            "--source", "skill-test",
+            "--memory-type", "project_info",
+            "--tags", "文档,规范",
+            "--filters", '{"scope":"docs"}',
+        ])
+
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+            with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
+                args.func(args)
+
+        request, _ = calls[0]
+        payload = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(payload["filters"]["project"], "Memaster")
+        self.assertEqual(payload["filters"]["area"], "docs")
+        self.assertEqual(payload["filters"]["source"], "skill-test")
+        self.assertEqual(payload["filters"]["memory_type"], "project_info")
+        self.assertEqual(payload["filters"]["tags"], ["文档", "规范"])
+        self.assertEqual(payload["filters"]["scope"], "docs")
+        self.assertNotIn("user_id", payload)
+
+    def test_get_builds_expected_request(self):
+        calls = []
+
+        def fake_urlopen(request, timeout):
+            calls.append((request, timeout))
+            return FakeResponse({"id": "abc"})
+
+        parser = memaster_memory.build_parser()
+        args = parser.parse_args(["get", "--memory-id", "abc"])
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+            with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
+                args.func(args)
+
+        request, _ = calls[0]
+        self.assertEqual(request.full_url, "https://api.memaster.cn/memories/abc")
+        self.assertEqual(request.get_method(), "GET")
+
     def test_delete_requires_yes(self):
         parser = memaster_memory.build_parser()
         args = parser.parse_args(["delete", "--memory-id", "abc"])
         with self.assertRaises(SystemExit):
             args.func(args)
+
+    def test_delete_with_yes_builds_expected_request(self):
+        calls = []
+
+        def fake_urlopen(request, timeout):
+            calls.append((request, timeout))
+            return FakeResponse({"message": "Memory deleted successfully"})
+
+        parser = memaster_memory.build_parser()
+        args = parser.parse_args(["delete", "--memory-id", "abc", "--yes"])
+        with patch.dict(os.environ, {"MEMASTER_API_KEY": "m0sk_test"}, clear=True):
+            with patch.object(memaster_memory.urllib.request, "urlopen", fake_urlopen):
+                args.func(args)
+
+        request, _ = calls[0]
+        self.assertEqual(request.full_url, "https://api.memaster.cn/memories/abc")
+        self.assertEqual(request.get_method(), "DELETE")
 
 
 if __name__ == "__main__":

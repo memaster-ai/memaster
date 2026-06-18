@@ -13,6 +13,8 @@ X-API-Key: <MEMASTER_API_KEY>
 Content-Type: application/json
 ```
 
+The REST API scopes requests by the API Key owner. `user_id` is optional and should be used only when you intentionally need a terminal-user filter. Prefer metadata filters such as `project`, `area`, `scope`, `source`, `memory_type`, and `tags` for project memories.
+
 ## Add memory
 
 ```http
@@ -24,21 +26,19 @@ POST /memories
   "messages": [
     { "role": "user", "content": "Memory content" }
   ],
-  "user_id": "<MEMASTER_USER_ID>",
   "agent_id": "<MEMASTER_AGENT_ID>",
-  "infer": true,
+  "infer": false,
   "metadata": {
     "title": "Title",
     "memory_type": "project_info",
     "project": "Project",
     "area": "Area",
+    "scope": "Scope",
     "source": "<MEMASTER_SOURCE>",
     "tags": ["tag"]
   }
 }
 ```
-
-At least one of `user_id`, `agent_id`, or `run_id` is required.
 
 Set `infer` to `true` when you want the server to extract durable memories from the input instead of storing the whole text verbatim.
 
@@ -51,11 +51,14 @@ POST /search
 ```json
 {
   "query": "What should I remember about this task?",
-  "user_id": "<MEMASTER_USER_ID>",
   "agent_id": "<MEMASTER_AGENT_ID>",
   "top_k": 5,
   "filters": {
-    "project": "Project"
+    "project": "Project",
+    "area": "Area",
+    "source": "<MEMASTER_SOURCE>",
+    "memory_type": "project_info",
+    "tags": ["tag"]
   }
 }
 ```
@@ -63,7 +66,13 @@ POST /search
 ## List memory
 
 ```http
-GET /memories?user_id=<MEMASTER_USER_ID>&project=<Project>
+GET /memories?project=<Project>&area=<Area>&source=<MEMASTER_SOURCE>&tags=tag1,tag2
+```
+
+## Get memory
+
+```http
+GET /memories/{memoryID}
 ```
 
 ## Update memory
@@ -78,7 +87,8 @@ PUT /memories/{memoryID}
   "metadata": {
     "memory_type": "project_info",
     "project": "Project",
-    "area": "Area"
+    "area": "Area",
+    "tags": ["tag"]
   }
 }
 ```

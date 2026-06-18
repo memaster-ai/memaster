@@ -6,15 +6,16 @@ Loads config from ``<skill_dir>/.env.local`` and process environment.
 Environment:
   MEMASTER_BASE_URL  default: https://api.memaster.cn
   MEMASTER_API_KEY   required for network commands
-  MEMASTER_USER_ID   optional default scope
-  MEMASTER_AGENT_ID  optional default scope
-  MEMASTER_SOURCE    optional metadata.source
+  MEMASTER_USER_ID   optional; not applied by default, pass --user-id when needed
+  MEMASTER_AGENT_ID  optional default agent scope
+  MEMASTER_SOURCE    optional metadata.source and filter source
   MEMASTER_SERVICE   default: Memaster
   MEMASTER_PROJECT   optional default metadata/filter project
   MEMASTER_AREA      optional default metadata/filter area
   MEMASTER_SCOPE     optional default metadata/filter scope
   MEMASTER_INFER     optional true/false; add sends infer=true when enabled
   MEMASTER_TIMEOUT_SECONDS optional request timeout, default 20
+  MEMASTER_TOP_K     optional default search top_k, default 5
 """
 
 from __future__ import annotations
@@ -29,7 +30,6 @@ import urllib.request
 from typing import Any
 
 DEFAULT_BASE_URL = "https://api.memaster.cn"
-DEFAULT_USER_ID = ""
 DEFAULT_AGENT_ID = ""
 DEFAULT_SERVICE = "Memaster"
 REQUIRED_STRUCTURED_METADATA = ("project", "area")
@@ -117,9 +117,9 @@ def load_metadata(raw: str) -> dict[str, Any]:
     try:
         metadata = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise SystemExit(f"Invalid --metadata JSON: {exc}") from exc
+        raise SystemExit(f"Invalid JSON: {exc}") from exc
     if not isinstance(metadata, dict):
-        raise SystemExit("Invalid --metadata JSON: expected an object")
+        raise SystemExit("Invalid JSON: expected an object")
     return metadata
 
 
@@ -144,21 +144,13 @@ def require_structured_metadata(metadata: dict[str, Any]) -> None:
         )
 
 
-def require_scope(args: argparse.Namespace) -> None:
-    if not (args.user_id or args.agent_id or args.run_id):
-        raise SystemExit(
-            "At least one of --user-id / --agent-id / --run-id "
-            "or MEMASTER_USER_ID / MEMASTER_AGENT_ID must be provided."
-        )
-
-
 def build_scope_body(args: argparse.Namespace) -> dict[str, Any]:
     body: dict[str, Any] = {}
-    if args.user_id:
+    if getattr(args, "user_id", ""):
         body["user_id"] = args.user_id
-    if args.agent_id:
+    if getattr(args, "agent_id", ""):
         body["agent_id"] = args.agent_id
-    if args.run_id:
+    if getattr(args, "run_id", ""):
         body["run_id"] = args.run_id
     return body
 
@@ -174,9 +166,9 @@ def default_filters(args: argparse.Namespace) -> dict[str, Any]:
         value = getattr(args, key, "")
         if isinstance(value, str) and value.strip():
             filters[key] = value.strip()
-    if args.tags:
+    if getattr(args, "tags", ""):
         filters["tags"] = parse_tags(args.tags)
-    extra = load_metadata(args.filters)
+    extra = load_metadata(getattr(args, "filters", ""))
     filters.update({key: value for key, value in extra.items() if value not in (None, "")})
     return filters
 
@@ -187,10 +179,12 @@ def cmd_doctor(args: argparse.Namespace) -> None:
         "env_local_exists": os.path.exists(ENV_LOCAL_PATH),
         "base_url": base_url(),
         "has_api_key": bool(env("MEMASTER_API_KEY")),
-        "user_id": bool(args.user_id),
+        "env_user_id_configured": bool(env("MEMASTER_USER_ID")),
+        "user_id_arg": bool(args.user_id),
         "agent_id": bool(args.agent_id),
         "project": args.project,
         "area": args.area,
+        "source": args.source,
         "infer": env_bool("MEMASTER_INFER"),
         "timeout_seconds": env_int("MEMASTER_TIMEOUT_SECONDS", 20),
     }
@@ -198,7 +192,6 @@ def cmd_doctor(args: argparse.Namespace) -> None:
 
 
 def cmd_search(args: argparse.Namespace) -> None:
-    require_scope(args)
     body: dict[str, Any] = {"query": args.query, "top_k": args.top_k}
     body.update(build_scope_body(args))
     filters = default_filters(args)
@@ -208,7 +201,6 @@ def cmd_search(args: argparse.Namespace) -> None:
 
 
 def cmd_add(args: argparse.Namespace) -> None:
-    require_scope(args)
     metadata: dict[str, Any] = {
         "title": args.title,
         "memory_type": args.memory_type,
@@ -231,7 +223,6 @@ def cmd_add(args: argparse.Namespace) -> None:
 
 
 def cmd_list(args: argparse.Namespace) -> None:
-    require_scope(args)
     params = build_scope_body(args)
     for key in ("project", "area", "scope", "source", "memory_type"):
         value = getattr(args, key, "")
@@ -242,6 +233,10 @@ def cmd_list(args: argparse.Namespace) -> None:
     query = urllib.parse.urlencode({key: value for key, value in params.items() if value})
     path = f"/memories?{query}" if query else "/memories"
     print_json(request_json("GET", path))
+
+
+def cmd_get(args: argparse.Namespace) -> None:
+    print_json(request_json("GET", f"/memories/{args.memory_id}"))
 
 
 def cmd_update(args: argparse.Namespace) -> None:
@@ -268,7 +263,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     def add_scope(p: argparse.ArgumentParser) -> None:
-        p.add_argument("--user-id", default=env("MEMASTER_USER_ID", DEFAULT_USER_ID))
+        p.add_argument("--user-id", default="", help="Optional terminal user filter. Not read from MEMASTER_USER_ID by default.")
         p.add_argument("--agent-id", default=env("MEMASTER_AGENT_ID", DEFAULT_AGENT_ID))
         p.add_argument("--run-id", default="")
 
@@ -288,14 +283,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor = subparsers.add_parser("doctor", help="Show local configuration status without printing secrets")
     add_scope(doctor)
-    add_structured_metadata_args(doctor)
+    add_filter_args(doctor)
     doctor.set_defaults(func=cmd_doctor)
 
     search = subparsers.add_parser("search", help="Search Memaster memory")
     add_scope(search)
     add_filter_args(search)
     search.add_argument("--query", required=True)
-    search.add_argument("--top-k", type=int, default=int(env("MEMASTER_TOP_K", "5") or "5"))
+    search.add_argument("--top-k", type=int, default=env_int("MEMASTER_TOP_K", 5))
     search.add_argument("--filters", default="", help="Extra filters JSON")
     search.set_defaults(func=cmd_search)
 
@@ -315,6 +310,10 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope(list_cmd)
     add_filter_args(list_cmd)
     list_cmd.set_defaults(func=cmd_list)
+
+    get = subparsers.add_parser("get", help="Get a single Memaster memory by id")
+    get.add_argument("--memory-id", required=True)
+    get.set_defaults(func=cmd_get)
 
     update = subparsers.add_parser("update", help="Update Memaster memory")
     add_structured_metadata_args(update)

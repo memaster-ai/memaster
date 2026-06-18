@@ -38,17 +38,18 @@ MEMASTER_TIMEOUT_SECONDS=20
 
 ```bash
 python3 scripts/memaster_memory.py doctor
-python3 scripts/memaster_memory.py search --query "test" --top-k 1
+python3 scripts/memaster_memory.py search --query "test" --top-k 1 --project "your-project"
 ```
 
 ## Common commands
 
 ```bash
 python3 scripts/memaster_memory.py search --query "What are the project conventions?"
-python3 scripts/memaster_memory.py add --title "Project convention" --content "This project uses pnpm." --memory-type project_info --tags "项目,规范"
-python3 scripts/memaster_memory.py add --infer --title "Extract memories" --content "User prefers concise Chinese replies and pnpm." --memory-type user_preference --tags "偏好,写入"
-python3 scripts/memaster_memory.py list --project "my-project"
-python3 scripts/memaster_memory.py update --memory-id "memory-id" --content "Updated memory" --project "my-project" --area "docs"
+python3 scripts/memaster_memory.py add --title "Project convention" --content "This project uses pnpm." --memory-type project_info --project "my-project" --area "docs" --tags "项目,规范"
+python3 scripts/memaster_memory.py add --infer --title "Extract memories" --content "User prefers concise Chinese replies and pnpm." --memory-type user_preference --project "my-project" --area "profile" --tags "偏好,写入"
+python3 scripts/memaster_memory.py list --project "my-project" --source "cursor"
+python3 scripts/memaster_memory.py get --memory-id "memory-id"
+python3 scripts/memaster_memory.py update --memory-id "memory-id" --content "Updated memory" --project "my-project" --area "docs" --tags "更新,文档"
 python3 scripts/memaster_memory.py delete --memory-id "memory-id" --yes
 ```
 
